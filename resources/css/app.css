@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback');
+@import 'admin-lte/plugins/fontawesome-free/css/all.min.css';
+@import 'admin-lte/dist/css/adminlte.min.css';
+
+
+.nav-link.active {
+  background: #FD7401 !important;
+  color: #fff;
+}
+.nav .nav-link.active {
+  background: #FD7401 !important;
+  color: #fff;
+}
+.nav-color{
+   background: #FD7401 !important;
+  color: #fff !important;
+}
+
+.btn-primary-color {
+    background-color: #FD7401 !important;
+    color: #fff;
+    border-color: #FD7401 !important; /* Optional: Adjust border color if needed */
+    transition: background-color 0.3s ease; /* Smooth transition effect */
+
+}
+
+.btn-primary-color:hover {
+    background-color: #FF9E4C !important; /* New color for hover */
+    border-color: #FF9E4C !important; /* Optional: Adjust border color for hover */
+    color: #fff; /* Ensure text color remains white */
+}

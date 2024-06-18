@@ -1,0 +1,295 @@
+<template>
+  <div>
+    <!-- Content Header -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Users</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item">
+                <a href="#">Home</a>
+              </li>
+              <li class="breadcrumb-item active">Users</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">User List</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <!-- Add New User Button -->
+                <button
+                  type="button"
+                  class="mb-2 btn btn-primary"
+                  @click="addUser"
+                >
+                  <i class="fa fa-plus-circle mr-1"></i> Add New User
+                </button>
+
+                <!-- User Table -->
+                <table
+                  id="example1"
+                  class="table table-bordered table-striped"
+                >
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(user, index) in users" :key="user.id">
+                      <td class="text-center align-middle">{{ index + 1 }}</td>
+                      <td class="text-center align-middle">{{ user.name }}</td>
+                      <td class="text-center align-middle">{{ user.email }}</td>
+                      <td class="text-center align-middle">
+                        <a href="#" @click.prevent="editUser(user)">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->
+
+    <!-- User Creation Modal -->
+    <div
+      class="modal fade"
+      id="createUserModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              <span v-if="editing">Editing User</span>
+              <span v-else>Add User</span>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              @click="closeModal"
+            ></button>
+          </div>
+
+          <Form
+            ref="form"
+            @submit="editing ? updateUser(formValues) : createUser(formValues)"
+            :validation-schema="schema"
+            v-slot="{ errors }"
+            :initial-values="formValues"
+          >
+            <div class="modal-body">
+              <!-- Name Field -->
+              <div class="mb-2">
+                <label for="name" class="form-label">Name</label>
+                <Field
+                  type="text"
+                  name="name"
+                  class="form-control rounded-Field"
+                  placeholder="Enter name"
+                  v-model="formValues.name"
+                  :class="{ 'is-invalid': errors.name }"
+                />
+                <span class="invalid-feedback">{{ errors.name }}</span>
+              </div>
+
+              <!-- Email Field -->
+              <div class="mb-2">
+                <label for="email" class="form-label">Email</label>
+                <Field
+                  type="text"
+                  name="email"
+                  class="form-control rounded-Field"
+                  placeholder="Enter email"
+                  v-model="formValues.email"
+                  :class="{ 'is-invalid': errors.email }"
+                />
+                <span class="invalid-feedback">{{ errors.email }}</span>
+              </div>
+
+              <!-- Password Fields -->
+              <div class="mb-2">
+                <label for="password" class="form-label">Password</label>
+                <Field
+                  type="password"
+                  name="password"
+                  class="form-control rounded-Field"
+                  placeholder="Enter password"
+                  v-model="formValues.password"
+                  :class="{ 'is-invalid': errors.password }"
+                />
+                <span class="invalid-feedback">{{ errors.password }}</span>
+              </div>
+
+              <div class="mb-2">
+                <label
+                  for="password_confirmation"
+                  class="form-label"
+                  >Confirm Password</label
+                >
+                <Field
+                  type="password"
+                  name="password_confirmation"
+                  class="form-control rounded-Field"
+                  placeholder="Confirm password"
+                  v-model="formValues.password_confirmation"
+                  :class="{ 'is-invalid': errors.password_confirmation }"
+                />
+                <span class="invalid-feedback">{{
+                  errors.password_confirmation
+                }}</span>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+                @click="closeModal"
+              >
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </Form>
+        </div>
+      </div>
+    </div>
+    <!-- /.modal -->
+  </div>
+</template>
+
+
+<script setup>
+import axios from "axios";
+import { onMounted, reactive, ref } from "vue";
+import { Form, Field } from "vee-validate";
+import * as yup from "yup";
+import Toastify from "toastify-js";
+
+const users = ref([]);
+const error = ref(null);
+const editing = ref(false);
+const formValues = ref({
+  id: null,
+  name: "",
+  email: "",
+  password: "",
+  password_confirmation: "",
+});
+const form = ref(null);
+const getUsers = async () => {
+    try {
+        const response = await axios.get("http://127.0.0.1:8000/api/users");
+        users.value = response.data;
+    } catch (err) {
+        error.value = "Failed to fetch users";
+    }
+};
+
+// Validation schema for form fields
+const schema = yup.object({
+    name: yup.string().required(),
+    email: yup.string().email().required(),
+    password: yup.string().required(),
+    password_confirmation: yup
+        .string()
+        .required()
+        .oneOf([yup.ref("password"), null], "Passwords must match"),
+});
+
+// Function to create a new user
+const createUser = async (values, { resetForm }) => {
+    try {
+        const response = await axios.post(
+            "http://127.0.0.1:8000/api/users",
+            values
+        );
+        users.value.push(response.data);
+        resetForm();
+        // Show success toast notification
+        Toastify({
+            text: "User created successfully!",
+            duration: 2000,
+            gravity: "top",
+            position: "right",
+            close: false,
+            style: {
+                background: "linear-gradient(to right, #00b09b, #96c93d)",
+                color: "#fff",
+            },
+        }).showToast();
+        $("#createUserModal").modal("hide");
+    } catch (err) {
+        console.error("Failed to create user:", err);
+        error.value = "Failed to create user";
+    }
+};
+
+// add User
+const addUser = () => {
+    editing.value = false;
+    $("#createUserModal").modal("show");
+};
+// edit user
+
+const editUser = (user) => {
+    editing.value = true;
+    formValues.value = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        password : user.password,
+        password_confirmation : user.password_confirmation
+    };
+    // Reset the form
+    // form.value.resetForm();
+    // Show the modal
+    $("#createUserModal").modal("show");
+};
+const updateUser = async (values) => {
+    console.log(values)
+}
+
+// Fetch users when component is mounted
+onMounted(() => {
+    getUsers();
+});
+</script>
+
+<style scoped>
+/* Add your scoped styles here */
+</style>
