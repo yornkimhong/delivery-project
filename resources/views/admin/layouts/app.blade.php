@@ -162,7 +162,7 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
 
             <a href="index3.html" class="brand-link">
-                <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+                <img src="{{ asset('RIth expression-01.png') }}" alt="AdminLTE Logo" height="50" class="mr-3"
                     style="opacity: .8">
                 <span class="brand-text font-weight-light">Delivery</span>
             </a>

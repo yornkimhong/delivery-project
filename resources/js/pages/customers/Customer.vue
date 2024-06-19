@@ -23,8 +23,8 @@
                                     <thead>
                                         <tr>
                                             <th class="text-center">#</th>
-                                            <th class="text-center">Name</th>
-                                            <th class="text-center">Phone</th>
+                                            <th class="text-center">Sender Name</th>
+                                            <th class="text-center">Receiver Phone</th>
                                             <th class="text-center">
                                                 Receiver Name
                                             </th>
